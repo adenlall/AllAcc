@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Admin;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -36,10 +38,28 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $request->user(),
             ],
+            'is_admin' => fn () => $request->session()->has('admin_token')
+                ? (Admin::where('token', Crypt::decrypt($request->session()->get('admin_token')))->exists() ?
+                    [
+                        "is"    => true,
+                        "name"  => Admin::where('token', Crypt::decrypt($request->session()->get('admin_token')))->get()->first()->username,
+                    ]
+                    :
+                    [
+                        "is"    => false,
+                        "name"  => null,
+                    ]
+                )
+                :
+                [
+                    "is"    => false,
+                    "name"  => null,
+                ],
             'flash' => [
                 'type' => $request->session()->get('type'),
                 'message' => $request->session()->get('message'),

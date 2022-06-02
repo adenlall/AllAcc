@@ -280,9 +280,7 @@ function AsSeem() {
                                     :
                                     accs
                                 }
-
                             </section>
-
                         </div>
                     </div>
                 </div>

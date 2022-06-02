@@ -1,4 +1,6 @@
 {
+    "name": "allacc",
+    "proxy": "http://127.0.0.1:8000/",
     "private": true,
     "scripts": {
         "dev": "npm run development",

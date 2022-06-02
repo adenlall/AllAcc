@@ -18,12 +18,13 @@ return new class extends Migration
             $table->string('name');
             $table->string('username')->unique();
             $table->string('email')->unique();
+            $table->string('type')->default('user__user');
 
             $table->string('gender')->nullable();
             $table->string('country')->nullable();
             $table->boolean('age')->nullable();
-            $table->date('birthday')->nullable();
             $table->string('title')->nullable();
+            $table->date('birthday')->nullable();
 
             $table->string('quote')->nullable();
             $table->string('track')->nullable();

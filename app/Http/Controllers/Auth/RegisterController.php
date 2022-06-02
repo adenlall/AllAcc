@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Service;
 use App\Models\User;
+use App\Rules\Nospace;
+use App\Rules\Username;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -22,7 +24,7 @@ class RegisterController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required'],
-            'username' => ['required', 'unique:users'],
+            'username' => ['required', 'unique:users', new Username, new Nospace],
             'email' => ['required', 'unique:users'],
             'password' => ['required'],
         ]);

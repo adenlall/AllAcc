@@ -20,7 +20,6 @@ class AsSeemController extends Controller
 
 
         $path = $username;
-        $lall = null;
 
         if (User::where('username', $path)->exists()) {
 
@@ -32,34 +31,40 @@ class AsSeemController extends Controller
             $services = Service::where('username', $path)->get()->first();
             $services_config = DB::table('config')->get();
             $deezURL = "https://api.deezer.com/search?q=artist:'{$user->artist}'track:'{$user->track}'";
+            // $resop = Http::retry(2)->get($deezURL)->json();
+            // dd($resop);
+            if (User::where('username', $path)->select($query)->whereNotNull('artist')->exists()) {
 
-            if (User::where('username', $path)->select($query)->whereNotNull('track')->exists()) {
+                try {
+                    $resop = Http::retry(2)->get($deezURL)->json();
+                    // dd($resop);
+                    if ($resop["total"] !== 0 || $resop["total"] !== null) {
 
-                try{
-                    $resop = Http::timeout(2)->retry(1, 1)->get($deezURL)->json();
-                }catch (Exception $ex) {
-                    $lall = null;
-                }
-                if ($resop["total"] !== 0 || $resop["total"] !== null) {
+                        return Inertia::render('AsSeem', [
+                            "soung" => $resop["data"][0],
+                            "user" => $user,
+                            "services" => $services,
+                            "services_config" => $services_config,
+                        ]);
+                    } else {
 
+                        return Inertia::render('AsSeem', [
+                            "soung" => null,
+                            "user" => $user,
+                            "services" => $services,
+                            "services_config" => $services_config,
+                        ]);
+                    }
+                } catch (Exception $ex) {
                     return Inertia::render('AsSeem', [
-                        "soung" => $resop["data"][0],
+                        "soung" => null,
                         "user" => $user,
                         "services" => $services,
                         "services_config" => $services_config,
                     ]);
-
-                } else {
-
-                    return Inertia::render('AsSeem', [
-                        "soung" => $lall,
-                        "user" => $user,
-                        "services" => $services,
-                        "services_config" => $services_config,
-                    ]);
-
                 }
             } else {
+                // dd('no traxk');
 
                 return Inertia::render('AsSeem', [
                     "soung" => null,

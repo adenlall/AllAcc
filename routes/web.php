@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AboutController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminPagesController;
 use App\Http\Controllers\AnilistController;
 use App\Http\Controllers\AnilistPrepareController;
 use App\Http\Controllers\AsSeemController;
@@ -24,21 +26,12 @@ Route::get('about', AboutController::class)->name('about');
 
 
 
-Route::middleware('auth')->group(function () {
+
+Route::middleware('auth', 'toAdminDash')->group(function () {
 
     Route::get('profile', ProfileController::class, 'show')->name('profile');
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
-    Route::post('logout', function(){
-        Session::flush();
-
-        Auth::logout();
-
-        return redirect('home', [
-            'type' => 'success',
-            'message' => 'You out now!'
-        ]);
-    });
     Route::post('soung', SoungController::class);
     Route::post('profile', ProfileUpdateController::class);
     Route::post('setting', SevicesController::class);
@@ -48,6 +41,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('guest')->group(function () {
+    // Route::get('login/admin', [LoginController::class, 'admin']);
     Route::get('login', [LoginController::class, 'create'])->name('login');
     Route::post('login', [LoginController::class, 'store']);
 
@@ -58,6 +52,25 @@ Route::middleware('guest')->group(function () {
     Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 });
 
+Route::middleware('auth', 'admin', 'adminRequ')->group(function () {
+
+    Route::get('admin', [AdminController::class, 'index'])->name('adminauth');
+    Route::get('admin/verify', [AdminController::class, 'verify'])->name('adminVerify');
+
+});
+
+Route::middleware('auth','admin', 'adminAccess')->group(function () {
+    Route::get('admin/{admin}/app', [AdminPagesController::class, 'app']);
+    Route::get('admin/{admin}/activities', [AdminPagesController::class, 'activities']);
+    Route::get('admin/{admin}/statistic', [AdminPagesController::class, 'statistic']);
+    Route::get("admin/{admin}/dashboard", [AdminController::class, 'dashboard']);
+});
 
 Route::get('{username}', AsSeemController::class)->name('AsSeem');;
 
+
+Route::post('logout', function(){
+    Session::flush();
+    Auth::logout();
+    return redirect('/');
+});

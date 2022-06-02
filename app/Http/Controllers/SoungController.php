@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\ConnectionException;
 
 class SoungController extends Controller
 {
@@ -18,9 +19,17 @@ class SoungController extends Controller
         ]);
 
         if ($validated) {
-
+            // dd($validated);
             $deezURL = "https://api.deezer.com/search?q=artist:'{$request->artist}'track:'{$request->track}'";
-            $resop = Http::get($deezURL)->json();
+            try {
+                $resop = Http::get($deezURL)->json();
+            } catch(ConnectionException $e)
+            {
+                return redirect('/dashboard')->with([
+                    'type' => 'error',
+                    'message' => 'A fatal error!'
+                ]);
+            }
             if (count($resop["data"]) === 0) {
                 return redirect('/dashboard')->with([
                     'type' => 'error',
